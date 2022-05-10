@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>FreeTrader</title>
+
+    <!-- update the version number as needed -->
+    <script defer src="/__/firebase/9.7.0/firebase-app-compat.js"></script>
+    <!-- include only the Firebase features as you need -->
+    <script defer src="/__/firebase/9.7.0/firebase-auth-compat.js"></script>
+    <script defer src="/__/firebase/9.7.0/firebase-database-compat.js"></script>
+    <script defer src="/__/firebase/9.7.0/firebase-firestore-compat.js"></script>
+    <script defer src="/__/firebase/9.7.0/firebase-functions-compat.js"></script>
+    <script defer src="/__/firebase/9.7.0/firebase-messaging-compat.js"></script>
+    <script defer src="/__/firebase/9.7.0/firebase-storage-compat.js"></script>
+    <script defer src="/__/firebase/9.7.0/firebase-analytics-compat.js"></script>
+    <script defer src="/__/firebase/9.7.0/firebase-remote-config-compat.js"></script>
+    <script defer src="/__/firebase/9.7.0/firebase-performance-compat.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <!-- 
+      initialize the SDK after all desired features are loaded, set useEmulator to false
+      to avoid connecting the SDK to running emulators.
+    -->
+    <script defer src="/__/firebase/init.js?useEmulator=true"></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <script>
+
+      $(document).ready(function(){
+        // jQuery methods go here...
+        $("#enterbutton").click(function(){
+          $("#welcome").hide();
+        });
+        
+      });
+      var v1 = null; //results of the first vote
+      var v2 = null; //results of the second vote
+
+      function Stars(NumStars) {
+        StarCode = "";
+        for (let i = 1; i <= Math.min(NumStars,5); i++) {
+          StarCode += "<span class='fa fa-star checked'></span>";
+        }
+        for (let i = Math.min(NumStars,5); i <= 4; i++) {
+          StarCode += "<span class='fa fa-star'></span>";
+        }
+        return StarCode;
+      }
+
+      function VotesRemaining() {
+        var votesleft = 0;
+        if (v1 == null) {votesleft = votesleft + 1;}
+        if (v2 == null) {votesleft = votesleft + 1;}
+        return votesleft;
+      }
+      function ShowArt(ArtFilename,ArtName,ArtOwner,ArtDesc,ArtRank) {
+        var x = document.getElementById("Art");
+        var v = document.getElementById("Vote");
+        if (x.style.display === "none") {
+          x.style.display = "block";
+          v.style.display = "block";
+
+          x.innerHTML = "<img src='"+ArtFilename+"' height=100%>";
+          v.innerHTML = PanelDisplay(ArtFilename,ArtName,ArtOwner,ArtDesc,ArtRank);
+        } else {
+          x.style.display = "none";
+          v.style.display = "none";
+        } 
+      }
+      
+      function PanelDisplay(ArtFilename,ArtName,ArtOwner,ArtDesc,ArtRank) {
+        DisplayText = "<h1>"+ArtName+"</h1><h2>Owner by <b><u>"+ArtOwner+"</u></b></h2><h3><a href=# alt='Link to Forum'>"+ArtDesc+"</a></h3><p>"+Stars(ArtRank)+"</p>";
+        if (VotesRemaining() == 2) {
+          DisplayText = DisplayText + "<p align=center><button id='enterbutton' onClick='VoteArt(\""+ArtFilename+"\",\""+ArtName+"\",\""+ArtOwner+"\",\""+ArtDesc+"\",\""+ArtRank+"\")'>Vote</button> <button id='enterbutton' onClick='ShowArt()'>Close</button></p>";
+        } else if (v1 == ArtFilename || v2 == ArtFilename) {
+          DisplayText = DisplayText + "<p align=center><button id='enterbutton' onClick='UnvoteArt(\""+ArtFilename+"\",\""+ArtName+"\",\""+ArtOwner+"\",\""+ArtDesc+"\",\""+ArtRank+"\")'>Unvote</button> <button id='enterbutton' onClick='ShowArt()'>Close</button></p>";
+        }  else if (VotesRemaining() == 1) {
+          DisplayText = DisplayText + "<p align=center><button id='enterbutton' onClick='VoteArt(\""+ArtFilename+"\",\""+ArtName+"\",\""+ArtOwner+"\",\""+ArtDesc+"\",\""+ArtRank+"\")'>Vote</button> <button id='enterbutton' onClick='ShowArt()'>Close</button></p>";
+        } else {
+          DisplayText = DisplayText + "<p align=center><button id='blankbutton'>Vote</button> <button id='enterbutton' onClick='ShowArt()'>Close</button></p>";
+        }
+        DisplayText = DisplayText + "<p>"+VotesRemaining()+" Votes Remaining</p>";
+        return DisplayText;
+      }
+
+      function VoteArt(ArtFilename,ArtName,ArtOwner,ArtDesc,ArtRank) {
+        if (v1 == null) {
+          v1 = ArtFilename;
+        } else if (v2 == null) {
+          v2 = ArtFilename;
+        }
+        //Refresh Panel
+        var v = document.getElementById("Vote");
+        v.innerHTML = PanelDisplay(ArtFilename,ArtName,ArtOwner,ArtDesc,ArtRank);
+      }
+
+      function UnvoteArt(ArtFilename,ArtName,ArtOwner,ArtDesc,ArtRank) {
+        if (v1 == ArtFilename) {
+          v1 = null;
+        } else if (v2 == ArtFilename) {
+          v2 = null;
+        }
+        //Refresh Panel
+        var v = document.getElementById("Vote");
+        v.innerHTML = PanelDisplay(ArtFilename,ArtName,ArtOwner,ArtDesc,ArtRank);
+      }
+    </script>
+    <style media="screen">
+      .checked {
+        color: orange;
+      }
+      body { 
+        background-image: url("bg.png");  
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+        background-position: center; 
+        background-size: cover;
+        font-family: Roboto, Helvetica, Arial, sans-serif; 
+        margin: 0; 
+        padding: 0; 
+      }
+      #welcome {
+        background-color: white; 
+        position: absolute;
+        margin: 10px;
+      }
+      #welcome h2 { color: #B041FF; font-weight: bold; font-size: 24px; margin: 0 0 8px; }
+      #welcome h1 { font-size: 30px; font-weight: 300; color: rgba(0,0,0,0.6); margin: 0 0 16px;}
+      #welcome p { line-height: 140%; margin: 16px 0 24px; font-size: 20px; }
+      #welcome a { display: block; text-align: center; background: #039be5; text-transform: uppercase; text-decoration: none; color: white; padding: 16px; border-radius: 4px; }
+      #welcome, #welcome a { box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24); }
+      #load { color: rgba(0,0,0,0.4); text-align: center; font-size: 13px; }
+      #gallery {
+        position: absolute;
+        top: 2%;
+        left: 2%;
+        bottom: 2%;
+        right: 2%;
+        background-image: url("gallery.png");
+        background-size: 100% 100%;
+        padding: 25px;
+        margin: 0px; 
+      }
+      #Art {
+        position: absolute; 
+        height: 90%;
+        bottom: 5%;
+        right: 38%;
+      }
+      #Vote {
+        background-color: white;
+        position: absolute; 
+        bottom: 5%;
+        right: 20%;
+        padding: 15px;
+        border-radius: 25px;
+      }
+      #Vote h1 { font-size: 30px; font-weight: 300; color: rgba(0,0,0,0.6); margin: 0 0 16px;}
+      #Vote h2 { color: #B041FF; font-weight: bold; font-size: 24px; margin: 0 0 8px; }
+      #enterbutton {
+        background-color: #1589FF;
+        border: none;
+        color: white;
+        padding: 15px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        border-radius: 12px;
+        text-transform: uppercase;
+        cursor: pointer;
+      }
+      #blankbutton {
+        background-color: grey;
+        border: none;
+        color: white;
+        padding: 15px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        border-radius: 12px;
+        text-transform: uppercase;
+      }
+      #artbutton {
+        background:none;
+        border: none;
+        float: left;
+        padding: 15px;
+        margin-top: 20%;
+        margin-left: 7%;
+        width: 10%;
+        height: 20%;
+        text-align: center;
+        text-decoration: none;
+        font-size: 16px;
+        border-radius: 12px;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="gallery">
+      <div id="welcome">
+        <table>
+          <tr><td colspan="2"><img src="welcome.png" width="20%"></td><td rowspan="2">
+            <img src="podium.png" width="100%">
+          <h2>Winner Definition</h2>
+          <p>The winners will be rewarded with generous prizes bag. The competition winners are those who rank <u>1st place</u>, <u>2nd place</u>, and <u>3rd place</u>. Ranking are based on the artwork's total votes.</p>
+          </td></tr>
+          <tr><td><h2>For Contestants</h2>
+            <p>Each contestant is required to stake 1 milliether (finney) in order to get access to the competition. By clicking ENTER button, you automatically agree with this rule and system will deduct your ENTRY FEE.</p>
+          </td>
+          <td>
+            <h2>For Voting</h2>
+          <p>Each Fantantic artwork is displayed in the competition room and the winners are determined by all contestants. Each contestant will get two votes on two different Artwork.</p>
+          </td></tr>
+          <tr><td colspan=3><p align="center"><button id="enterbutton">Enter</button></p></td></tr>
+        </table>
+      </div>
+      <div id="Art" style="display:none;"></div>
+      <div id="Vote" style="display:none;"></div>
+      <button id="artbutton" onclick="ShowArt('art1.png','Picture1','Owner1','Link to Forum 1',2)"></button>
+      <button id="artbutton" onclick="ShowArt('art2.png','Picture2','Owner2','Link to Forum 2',3)"></button>
+      <button id="artbutton" onclick="ShowArt('art3.png','Picture3','Owner3','Link to Forum 3',5)"></button>
+      <button id="artbutton" onclick="ShowArt('art4.png','Picture4','Owner4','Link to Forum 4',4)"></button>
+      <button id="artbutton" onclick="ShowArt('art5.png','Picture5','Owner5','Link to Forum 5',1)"></button>
+    </div>
+
+  </body>
+</html>
